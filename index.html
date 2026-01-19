@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ビジネス完全実行ロードマップ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+      animation: fadeIn 0.5s ease-out;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #1e293b;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 3px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+
+    // Icon Components (SVG replacements for lucide-react)
+    const Icon = ({ children, size = 24, className = "", ...props }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+        {children}
+      </svg>
+    );
+
+    const Rocket = (props) => (
+      <Icon {...props}><path d="M4.5 16.5c-1.5 1.5-1.5 3.5 0 5s3.5 1.5 5 0l5-5c1.5-1.5 1.5-3.5 0-5s-3.5-1.5-5 0z"/><path d="M12 15l-3-3 3-3 3 3z"/></Icon>
+    );
+    const Target = (props) => (
+      <Icon {...props}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></Icon>
+    );
+    const Briefcase = (props) => (
+      <Icon {...props}><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></Icon>
+    );
+    const Building2 = (props) => (
+      <Icon {...props}><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12h12"/><path d="M6 16h12"/><path d="M6 20h12"/><path d="M10 6h4"/><path d="M10 10h4"/></Icon>
+    );
+    const Megaphone = (props) => (
+      <Icon {...props}><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></Icon>
+    );
+    const Users = (props) => (
+      <Icon {...props}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></Icon>
+    );
+    const TrendingUp = (props) => (
+      <Icon {...props}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></Icon>
+    );
+    const ShieldCheck = (props) => (
+      <Icon {...props}><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></Icon>
+    );
+    const LogOut = (props) => (
+      <Icon {...props}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></Icon>
+    );
+    const CheckCircle = (props) => (
+      <Icon {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></Icon>
+    );
+    const AlertTriangle = (props) => (
+      <Icon {...props}><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></Icon>
+    );
+    const Lightbulb = (props) => (
+      <Icon {...props}><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></Icon>
+    );
+    const Wrench = (props) => (
+      <Icon {...props}><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></Icon>
+    );
+    const Menu = (props) => (
+      <Icon {...props}><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="18" x2="20" y2="18"/></Icon>
+    );
+    const X = (props) => (
+      <Icon {...props}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></Icon>
+    );
+    const ChevronRight = (props) => (
+      <Icon {...props}><polyline points="9 18 15 12 9 6"/></Icon>
+    );
+    const ArrowRight = (props) => (
+      <Icon {...props}><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></Icon>
+    );
+    const Save = (props) => (
+      <Icon {...props}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></Icon>
+    );
+    const Edit3 = (props) => (
+      <Icon {...props}><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></Icon>
+    );
+    const RefreshCw = (props) => (
+      <Icon {...props}><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></Icon>
+    );
+
+    // --- Data Structure ---
+
+    const roadmapData = [
+      {
+        id: 'phase1',
+        title: '第1フェーズ：起業の構想と検証',
+        subtitle: '0 → 1：売れる根拠を作る',
+        description: '「売れる根拠」を数字で示し、最小限のリスクでビジネスアイデアの市場性をテストします。',
+        icon: Lightbulb,
+        steps: [
+          {
+            title: '1. アイデア策定（USPの確立）',
+            purpose: '誰の・どんな痛みを・どう解消するかを言語化し、独自の売り（USP）を定める。',
+            actions: [
+              '自分の棚卸し：得意・好き・経験と市場のニーズが重なる部分を探す',
+              '競合の不満点リサーチ：レビューやSNSから「不満」を探し、逆手に取る',
+              'ChatGPT活用：「〇〇業界の隠れた不満を10個挙げて」と壁打ちする'
+            ],
+            tools: ['Miro / Xmind (マインドマップ)', 'ChatGPT / Claude (壁打ちAI)'],
+            example: '「事務作業が多すぎる教師」に対し、ITスキルを活かして解決策を提案する。',
+            caution: '自分本位なアイデアにならず、常に「誰の痛みか」を忘れないこと。',
+            notePlaceholder: '【ワーク】\n1. あなたの強み・得意なことは？\n2. ターゲット顧客の悩みは？\n3. それを解決するあなたのアイデア（USP）は？'
+          },
+          {
+            title: '2. 市場調査（リサーチ）',
+            purpose: '需要の有無とライバルをデータで確認し、ビジネスの方向性を決定づける。',
+            actions: [
+              '検索ボリューム調査：キーワードプランナーで需要の大きさを測る',
+              '悩みの質的調査：Yahoo!知恵袋やAmazonレビュー（★1〜2）で深い悩みを読む',
+              '競合分析：SimilarWebやラッコキーワードで流入経路や関連語を調べる'
+            ],
+            tools: ['Googleキーワードプランナー', 'Googleトレンド', 'Yahoo!知恵袋 / Amazonレビュー', 'SimilarWeb'],
+            example: '「テレワーク 肩こり」の検索数増＋知恵袋の深刻な悩み＝市場の隠れた需要。',
+            caution: '都合の良い情報だけでなく、ネガティブなデータも直視する。',
+            notePlaceholder: '【調査メモ】\n・ターゲットキーワードの月間検索数は？\n・競合の弱点（不満レビュー）は何か？\n・この市場に参入する余地はあるか？'
+          },
+          {
+            title: '3. 事業計画と資金調達',
+            purpose: 'ビジネスイメージを数字に落とし込み、収支見通しと必要資金を明確にする。',
+            actions: [
+              '収支シミュレーション：固定費・変動費・売上予測から損益分岐点を計算',
+              '資金繰り計画：入金と支払いのタイミングを考慮し、キャッシュフロー表を作成',
+              '創業融資検討：日本政策金融公庫などの申請書を書き、計画の甘さを点検'
+            ],
+            tools: ['freee創業計画（事業計画作成）', 'Googleスプレッドシート', '日本政策金融公庫 創業計画書フォーム'],
+            caution: '売上は保守的に、費用は多めに見積もる。計画は随時更新する。',
+            notePlaceholder: '【計画メモ】\n・初期費用はいくら必要？\n・損益分岐点（毎月いくら売ればトントンか）？\n・資金調達の方法は？'
+          }
+        ]
+      },
+      {
+        id: 'phase2',
+        title: '第2フェーズ：設立と基盤構築',
+        subtitle: '社会的信用の獲得とバックオフィス整備',
+        description: 'ビジネスを正式にスタートさせ、お金と契約の管理体制を整えます。',
+        icon: Building2,
+        steps: [
+          {
+            title: '1. 法人設立 / 開業届',
+            purpose: '法的手続きを完了し、公的に事業開始を宣言する。',
+            actions: [
+              '個人事業：税務署に開業届と青色申告承認申請書を提出',
+              '法人設立：定款作成（電子定款推奨）、登記申請を行う'
+            ],
+            tools: ['freee会社設立 / マネーフォワード会社設立 (書類自動生成・電子定款対応)'],
+            example: 'ツールを使えば専門知識なしで、印紙代0円（電子定款）で設立準備が可能。',
+            caution: '会社名や目的は将来の拡張も見越して決めること。',
+            notePlaceholder: '・屋号/会社名案\n・事業目的（定款用）\n・設立予定日は？'
+          },
+          {
+            title: '2. バックオフィス整備',
+            purpose: 'お金の通り道（銀行・カード）と契約手続きを整え、公私混同を防ぐ。',
+            actions: [
+              '事業用口座開設：ネット銀行（住信SBI、GMOあおぞら等）が手数料安価で推奨',
+              'クラウド会計導入：口座・カードを連携し、自動仕訳で経理を効率化',
+              '電子契約導入：紙とハンコを廃止し、印紙税削減とスピードアップを図る'
+            ],
+            tools: ['住信SBIネット銀行 / GMOあおぞらネット銀行', 'freee会計 / マネーフォワードクラウド会計', 'クラウドサイン (電子契約)'],
+            caution: '事業用とプライベートの資金は厳格に分ける。',
+            notePlaceholder: '・開設する銀行口座\n・導入する会計ソフト\n・経理ルーティン（いつ記帳するか）'
+          }
+        ]
+      },
+      {
+        id: 'phase3',
+        title: '第3フェーズ：集客と営業',
+        subtitle: '1 → 10：トラクション（売上実績）を作る',
+        description: '見込み客を集め、初めての売上を獲得します。フロー型とストック型を組み合わせます。',
+        icon: Megaphone,
+        steps: [
+          {
+            title: '1. 集客（マーケティング）',
+            purpose: '「攻め」の姿勢で認知を獲得する。',
+            actions: [
+              'フロー型（短期）：少額からのWeb広告テスト、SNSでの能動的発信',
+              'ストック型（長期）：SEOブログ記事作成、YouTube、SNSフォロワー資産化'
+            ],
+            tools: ['Canva (デザイン)', 'WordPress (SWELL推奨)', 'Meta広告マネージャ', 'Google Analytics'],
+            example: 'まず広告で初期顧客を取り、その利益をブログ等の資産構築に回す循環を作る。',
+            caution: '即効性のあるフロー型と、資産になるストック型のバランスが重要。',
+            notePlaceholder: '【集客プラン】\n・誰に向けて発信するか？\n・まずはどのSNS/広告媒体でテストするか？\n・予算はいくらか？'
+          },
+          {
+            title: '2. 育成（ナーチャリング）',
+            purpose: '「今すぐ買わない層」と信頼関係を構築し、将来の顧客へ育てる。',
+            actions: [
+              'リード獲得：有益な無料プレゼント（PDF等）で連絡先を入手',
+              'LINE/メルマガ配信：ステップ配信で価値提供を続け、最後にセールスを行う'
+            ],
+            tools: ['LINE公式アカウント', 'Lステップ / L Message (拡張ツール)', 'MailChimp'],
+            example: '「7日間無料講座」を自動配信し、信頼が高まったタイミングで有料商品を案内する。',
+            caution: '売り込みばかりはNG。役立つ情報8割、セールス2割を目安に。',
+            notePlaceholder: '・無料プレゼント（リードマグネット）のアイデア\n・ステップ配信のシナリオ概要'
+          },
+          {
+            title: '3. 営業（セールス）',
+            purpose: '課題を診断し、解決策を処方するスタンスで契約に結びつける。',
+            actions: [
+              'ヒアリング：事前に質問シートを用意し、顧客の真の課題を聞き出す',
+              '即決環境の用意：その場で決済・契約できるツール（Stripe/クラウドサイン）を準備',
+              '記録：AI文字起こしツールで言った言わないを防ぐ'
+            ],
+            tools: ['Zoom / Google Meet', 'Notta (AI文字起こし)', 'Stripe (決済)', 'クラウドサイン'],
+            caution: '断られても深追いせず、潔く引くことで好印象を残す。',
+            notePlaceholder: '・必ず聞くべきヒアリング項目3選\n・クロージングの言葉\n・決済方法の準備状況'
+          }
+        ]
+      },
+      {
+        id: 'phase4',
+        title: '第4フェーズ：仕組み化と組織化',
+        subtitle: '10 → 100：属人性の排除',
+        description: '自分が現場にいなくても回る組織を作り、規模拡大に備えます。',
+        icon: Users,
+        steps: [
+          {
+            title: '1. マニュアル化・標準化',
+            purpose: '業務プロセスを明文化し、誰でも一定水準の仕事ができるようにする。',
+            actions: [
+              '業務の洗い出し：手順を細分化して書き出す',
+              '動画マニュアル：PC操作などはLoomで画面録画して共有',
+              '社内Wiki構築：マニュアルやナレッジを一元管理する'
+            ],
+            tools: ['Notion (社内Wiki)', 'Loom (画面録画)', 'Googleドキュメント'],
+            example: '発送業務の手順を動画化し、新人が動画を見るだけで作業できるようにする。',
+            caution: '重要度・頻度の高い業務から優先してマニュアル化する。',
+            notePlaceholder: '・マニュアル化すべき「繰り返し業務」は？\n・どこにマニュアルを保存するか（Notion等）？'
+          },
+          {
+            title: '2. IT化・自動化',
+            purpose: '単純作業をツールに任せ、人間はクリエイティブな業務に集中する。',
+            actions: [
+              'ノーコード自動化：Zapier等でアプリ間のデータ連携を自動化',
+              'CRM/SFA導入：顧客情報をスプレッドシートから専用ツールへ移行',
+              'レポート自動化：定期的な集計作業を自動化する'
+            ],
+            tools: ['Zapier / Make (連携自動化)', 'HubSpot (CRM)', 'Google Apps Script'],
+            example: '問い合わせメール受信→スプレッドシート転記→Slack通知を全自動化。',
+            caution: '自動化の暴走リスクに注意し、定期的に動作確認を行う。',
+            notePlaceholder: '・自動化できそうな単純作業リスト\n・導入予定の自動化ツール'
+          },
+          {
+            title: '3. 採用と委譲',
+            purpose: 'コア業務以外を外注・採用し、創業者を経営に専念させる。',
+            actions: [
+              '外注活用：経理やデザイン等はクラウドソーシングやオンラインアシスタントへ',
+              '共感採用：スキルよりもカルチャー（価値観）のマッチ度で採用する',
+              '権限委譲：失敗を許容しながら、徐々に仕事を任せていく'
+            ],
+            tools: ['クラウドワークス / ランサーズ', 'Caster BIZ (オンライン秘書)', 'Wantedly (共感採用)'],
+            caution: '最初から完璧を求めず、任せる勇気を持つ。',
+            notePlaceholder: '・外注すべきノンコア業務は？\n・採用したい人物像（ペルソナ）'
+          }
+        ]
+      },
+      {
+        id: 'phase5',
+        title: '第5フェーズ：多角化とブランド確立',
+        subtitle: '独自性と強固な守り',
+        description: '収益の柱を増やし、ブランド力を高めつつ、ガバナンス（守り）を強化します。',
+        icon: TrendingUp,
+        steps: [
+          {
+            title: '1. ブランディングと広報',
+            purpose: '社会的認知を広げ、価格競争に巻き込まれないブランドを作る。',
+            actions: [
+              'プレスリリース：新サービスや提携情報をPR TIMES等で配信',
+              '発信活動：noteでの創業ストーリー発信や書籍出版（電子書籍含む）'
+            ],
+            tools: ['PR TIMES', 'note', 'Twitter(X) / LinkedIn'],
+            example: '地元メディアへの掲載実績を営業資料に使い、信用力を高める。',
+            caution: '事実に基く発信を心がけ、コンプライアンスを遵守する。',
+            notePlaceholder: '・発信できるニュースネタはあるか？\n・創業ストーリーの骨子'
+          },
+          {
+            title: '2. 新規事業とガバナンス',
+            purpose: '新たな収益源を作ると同時に、リスク管理体制を固める。',
+            actions: [
+              '新規事業（攻め）：既存顧客へのクロスセルや隣接市場への展開',
+              'セキュリティ（守り）：パスワード管理や情報漏洩対策の徹底',
+              '法務整備：契約書の雛形整備や顧問弁護士サービスの活用'
+            ],
+            tools: ['1Password (パスワード管理)', '弁護士ドットコム', 'SmartHR (労務・研修)'],
+            caution: '本業をおろそかにしない。ルールを作りすぎて組織を硬直させない。',
+            notePlaceholder: '・次に展開できそうな関連事業アイデア\n・セキュリティ/法務の課題点'
+          }
+        ]
+      },
+      {
+        id: 'phase6',
+        title: '第6フェーズ：エグジット',
+        subtitle: '出口戦略：M&A・事業承継',
+        description: '利益を確定させる、あるいは会社を次世代に託し永続化を図ります。',
+        icon: LogOut,
+        steps: [
+          {
+            title: '1. M&A・事業承継',
+            purpose: '会社を「商品」として捉え、適正価格で第三者に引き継ぐ。',
+            actions: [
+              '企業価値算定：自社がいくらで売れるか相場を知る',
+              '候補探し：M&Aプラットフォームへの登録や仲介会社への相談',
+              '承継準備：財務の整理整頓や後継者の育成'
+            ],
+            tools: ['BATONZ / TRANBI (M&Aプラットフォーム)', 'M&Aクラウド', '各種企業価値算定ツール'],
+            example: 'プラットフォームに匿名掲載し、買い手の反応を見て市場価値を測る。',
+            caution: '売却後も従業員や顧客が幸せになるよう責任を持つ。隠し事は厳禁。',
+            notePlaceholder: '・理想のエグジット時期と金額\n・売却時にアピールできる強み'
+          }
+        ]
+      }
+    ];
+
+    const principlesData = [
+      {
+        title: '鉄則1: 小さく始める',
+        subtitle: 'リーン・スタートアップ',
+        content: 'いきなり大きく投資せず、MVP（実用最小限の製品）でテストし、顧客の反応を見ながら改善を繰り返す。「完璧より早くやる」精神でリソース浪費を防ぐ。',
+        icon: Rocket
+      },
+      {
+        title: '鉄則2: 数字で語る',
+        subtitle: 'データドリブン',
+        content: '感覚や思い込みではなく、CPA、LTV、ROIなどの指標に基づいて意思決定する。数字は嘘をつかない羅針盤であり、周囲への説得力も増す。',
+        icon: TrendingUp
+      },
+      {
+        title: '鉄則3: 仕組みを売る',
+        subtitle: 'フランチャイズ思考',
+        content: '自分が現場にいなくても回る「販売システム」や「パッケージ」を作る。属人性を排除し、仕組み自体が価値を生む状態（資産化）を目指す。',
+        icon: Briefcase
+      }
+    ];
+
+    // --- Components ---
+
+    const ProgressBar = ({ percentage }) => (
+      <div className="w-full bg-slate-200 rounded-full h-2">
+        <div 
+          className="bg-blue-600 h-2 rounded-full transition-all duration-500 ease-out"
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+    );
+
+    const SidebarItem = ({ id, title, icon: Icon, isActive, onClick, progress }) => (
+      <button
+        onClick={onClick}
+        className={`w-full flex flex-col gap-1 px-4 py-3 text-sm font-medium transition-colors duration-200 rounded-lg mb-1 relative group
+          ${isActive 
+            ? 'bg-blue-600 text-white shadow-md' 
+            : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+          }`}
+      >
+        <div className="flex items-center gap-3 w-full">
+          <Icon size={18} />
+          <span className="text-left flex-1 truncate">{title}</span>
+          {isActive && <ChevronRight size={16} className="opacity-75" />}
+        </div>
+        
+        {/* Progress Bar inside Sidebar Item */}
+        <div className="w-full mt-1 pr-4">
+          <div className={`w-full h-1 rounded-full ${isActive ? 'bg-blue-500' : 'bg-slate-700'}`}>
+            <div 
+              className={`h-1 rounded-full transition-all duration-500 ${isActive ? 'bg-white' : 'bg-blue-500'}`}
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+      </button>
+    );
+
+    const SectionCard = ({ phaseId, step, index, userData, onToggleAction, onNoteChange }) => {
+      const stepData = userData[phaseId]?.[index] || { checkedActions: {}, notes: '' };
+      
+      return (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-8 transition-all hover:shadow-md">
+          <div className="bg-slate-50 border-b border-slate-100 px-6 py-4 flex items-start md:items-center justify-between flex-col md:flex-row gap-2">
+            <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <span className="bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-md">STEP {index + 1}</span>
+              {step.title}
+            </h3>
+          </div>
+          
+          <div className="p-6 space-y-8">
+            {/* Purpose */}
+            <div>
+              <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <Target size={16} /> 目的
+              </h4>
+              <p className="text-slate-700 leading-relaxed bg-blue-50/50 p-3 rounded-lg border-l-4 border-blue-500">
+                {step.purpose}
+              </p>
+            </div>
+
+            {/* Actions with Checkboxes */}
+            <div>
+              <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <CheckCircle size={16} /> 具体的なアクション
+              </h4>
+              <div className="space-y-3">
+                {step.actions.map((action, i) => {
+                  const isChecked = stepData.checkedActions[i] || false;
+                  return (
+                    <label 
+                      key={i} 
+                      className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all
+                        ${isChecked ? 'bg-green-50 border-green-200' : 'bg-white border-slate-100 hover:border-slate-300'}`}
+                    >
+                      <input 
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => onToggleAction(phaseId, index, i)}
+                        className="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300 flex-shrink-0"
+                      />
+                      <span className={`text-sm ${isChecked ? 'text-green-800 font-medium' : 'text-slate-700'}`}>
+                        {action}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* My Business Note */}
+            <div>
+              <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <Edit3 size={16} /> マイビジネスノート
+              </h4>
+              <div className="relative">
+                <textarea
+                  value={stepData.notes}
+                  onChange={(e) => onNoteChange(phaseId, index, e.target.value)}
+                  placeholder={step.notePlaceholder || "このステップでのアイデアや決定事項をここにメモしましょう..."}
+                  className="w-full min-h-[120px] p-4 text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-y"
+                />
+                <div className="absolute bottom-3 right-3 text-xs text-slate-400 flex items-center gap-1">
+                  <Save size={12} /> 自動保存
+                </div>
+              </div>
+            </div>
+
+            {/* Tools */}
+            <div>
+              <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <Wrench size={16} /> 推奨ツール
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {step.tools.map((tool, i) => (
+                  <span key={i} className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                    {tool}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Example & Caution Grid */}
+            <div className="grid md:grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+              {step.example && (
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                  <h5 className="text-xs font-bold text-slate-500 uppercase mb-2">例</h5>
+                  <p className="text-sm text-slate-600">{step.example}</p>
+                </div>
+              )}
+              {step.caution && (
+                <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-100">
+                  <h5 className="text-xs font-bold text-yellow-600 uppercase mb-2 flex items-center gap-1">
+                    <AlertTriangle size={12} /> 注意点
+                  </h5>
+                  <p className="text-sm text-slate-600">{step.caution}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const PrinciplesSection = () => (
+      <div className="space-y-6 animate-fadeIn">
+        <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl p-8 text-white shadow-lg mb-8">
+          <h2 className="text-3xl font-bold mb-4 flex items-center gap-3">
+            <ShieldCheck className="text-yellow-400" size={32} />
+            成功のための3つの鉄則
+          </h2>
+          <p className="text-slate-300 text-lg max-w-3xl">
+            これらは事業を成功に導くマインドセットであり、迷ったときに立ち返るべき普遍の指針です。
+          </p>
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-6">
+          {principlesData.map((item, index) => {
+            const IconComponent = item.icon;
+            return (
+              <div key={index} className="bg-white rounded-xl shadow-md border border-slate-100 p-6 flex flex-col h-full hover:shadow-lg transition-shadow">
+                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mb-4">
+                  <IconComponent size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-slate-800 mb-1">{item.title}</h3>
+                <p className="text-sm font-semibold text-blue-600 mb-4">{item.subtitle}</p>
+                <p className="text-slate-600 text-sm leading-relaxed flex-grow">
+                  {item.content}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+
+    const Dashboard = ({ setActiveTab, progressData }) => {
+      const totalSteps = roadmapData.reduce((acc, phase) => acc + phase.steps.reduce((sAcc, step) => sAcc + step.actions.length, 0), 0);
+      const completedSteps = progressData.totalCompleted;
+      const overallProgress = Math.round((completedSteps / totalSteps) * 100) || 0;
+
+      return (
+        <div className="space-y-12 animate-fadeIn py-8">
+          {/* Hero Section */}
+          <div className="text-center space-y-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100 text-blue-700 font-semibold text-sm">
+               <Rocket size={16} /> ビジネス構築ダッシュボード
+            </div>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight">
+              ビジネス完全実行<br className="md:hidden" />ロードマップ
+            </h1>
+            <p className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
+              起業のアイデア出しからエグジットまで。<br/>
+              アクションをチェックし、計画を書き込んで、あなたのビジネスを構築しましょう。
+            </p>
+            
+            {/* Overall Progress */}
+            <div className="max-w-xl mx-auto bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <div className="flex justify-between items-end mb-2">
+                <span className="text-sm font-bold text-slate-500 uppercase">Total Progress</span>
+                <span className="text-3xl font-extrabold text-blue-600">{overallProgress}%</span>
+              </div>
+              <ProgressBar percentage={overallProgress} />
+              <p className="text-xs text-slate-400 mt-2 text-right">{completedSteps} / {totalSteps} アクション完了</p>
+            </div>
+
+            <button 
+              onClick={() => setActiveTab('phase1')}
+              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 text-lg"
+            >
+              ロードマップを開始する <ArrowRight size={20} />
+            </button>
+          </div>
+
+          {/* Phase Grid with Progress */}
+          <div className="grid md:grid-cols-2 gap-6 pt-4">
+            {roadmapData.map((phase) => {
+              const phaseProgress = progressData.phases[phase.id] || 0;
+              const PhaseIcon = phase.icon;
+              return (
+                <div 
+                  key={phase.id}
+                  onClick={() => setActiveTab(phase.id)}
+                  className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:border-blue-300 hover:shadow-md transition-all cursor-pointer group"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors
+                        ${phaseProgress === 100 ? 'bg-green-100 text-green-600' : 'bg-blue-50 text-blue-600'}`}>
+                        {phaseProgress === 100 ? <CheckCircle size={24} /> : <PhaseIcon size={24} />}
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-slate-400 uppercase">{phase.id.replace('phase', 'Phase ')}</div>
+                        <h3 className="font-bold text-lg text-slate-800 group-hover:text-blue-600 transition-colors">
+                          {phase.title.split('：')[1] || phase.title}
+                        </h3>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-2xl font-bold text-slate-700">{phaseProgress}%</span>
+                    </div>
+                  </div>
+                  <ProgressBar percentage={phaseProgress} />
+                  <p className="text-slate-500 text-sm mt-4 line-clamp-2">{phase.description}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    };
+
+    // --- Main App Component ---
+
+    function BusinessRoadmapApp() {
+      const [activeTab, setActiveTab] = useState('welcome');
+      const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+      const [userData, setUserData] = useState({});
+      const [isLoaded, setIsLoaded] = useState(false);
+
+      // Load data from localStorage
+      useEffect(() => {
+        const savedData = localStorage.getItem('bizMapUserData');
+        if (savedData) {
+          try {
+            setUserData(JSON.parse(savedData));
+          } catch (e) {
+            console.error('Failed to parse user data', e);
+          }
+        }
+        setIsLoaded(true);
+      }, []);
+
+      // Save data to localStorage whenever it changes
+      useEffect(() => {
+        if (isLoaded) {
+          localStorage.setItem('bizMapUserData', JSON.stringify(userData));
+        }
+      }, [userData, isLoaded]);
+
+      // Calculate Progress
+      const progressData = useMemo(() => {
+        const phases = {};
+        let totalCompleted = 0;
+
+        roadmapData.forEach(phase => {
+          let phaseTotalActions = 0;
+          let phaseCompletedActions = 0;
+
+          phase.steps.forEach((step, index) => {
+            const stepActionsCount = step.actions.length;
+            phaseTotalActions += stepActionsCount;
+            
+            const userStepData = userData[phase.id]?.[index];
+            if (userStepData && userStepData.checkedActions) {
+              Object.values(userStepData.checkedActions).forEach(isChecked => {
+                if (isChecked) {
+                  phaseCompletedActions++;
+                  totalCompleted++;
+                }
+              });
+            }
+          });
+
+          phases[phase.id] = phaseTotalActions > 0 
+            ? Math.round((phaseCompletedActions / phaseTotalActions) * 100) 
+            : 0;
+        });
+
+        return { phases, totalCompleted };
+      }, [userData]);
+
+      // Handlers
+      const handleToggleAction = (phaseId, stepIndex, actionIndex) => {
+        setUserData(prev => {
+          const phaseData = prev[phaseId] || {};
+          const stepData = phaseData[stepIndex] || { checkedActions: {}, notes: '' };
+          const newChecked = !stepData.checkedActions[actionIndex];
+          
+          return {
+            ...prev,
+            [phaseId]: {
+              ...phaseData,
+              [stepIndex]: {
+                ...stepData,
+                checkedActions: {
+                  ...stepData.checkedActions,
+                  [actionIndex]: newChecked
+                }
+              }
+            }
+          };
+        });
+      };
+
+      const handleNoteChange = (phaseId, stepIndex, text) => {
+        setUserData(prev => {
+          const phaseData = prev[phaseId] || {};
+          const stepData = phaseData[stepIndex] || { checkedActions: {}, notes: '' };
+          
+          return {
+            ...prev,
+            [phaseId]: {
+              ...phaseData,
+              [stepIndex]: {
+                ...stepData,
+                notes: text
+              }
+            }
+          };
+        });
+      };
+
+      const handleReset = () => {
+        if (window.confirm('入力したデータをすべてリセットしますか？この操作は取り消せません。')) {
+          setUserData({});
+        }
+      };
+
+      // Close mobile menu when tab changes
+      useEffect(() => {
+        setIsMobileMenuOpen(false);
+      }, [activeTab]);
+
+      const activePhaseData = roadmapData.find(d => d.id === activeTab);
+      const ActivePhaseIcon = activePhaseData ? activePhaseData.icon : null;
+
+      if (!isLoaded) return null; // or loading spinner
+
+      return (
+        <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden">
+          
+          {/* Mobile Menu Overlay */}
+          {isMobileMenuOpen && (
+            <div 
+              className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+          )}
+
+          {/* Sidebar Navigation */}
+          <aside 
+            className={`fixed lg:static inset-y-0 left-0 z-50 w-72 bg-slate-900 text-slate-300 flex flex-col transform transition-transform duration-300 ease-in-out lg:transform-none 
+              ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
+          >
+            <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+              <div 
+                className="flex items-center gap-2 font-bold text-white text-xl cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => setActiveTab('welcome')}
+              >
+                <Rocket className="text-blue-500" />
+                <span>BizMap</span>
+              </div>
+              <button onClick={() => setIsMobileMenuOpen(false)} className="lg:hidden text-slate-400">
+                <X size={24} />
+              </button>
+            </div>
+
+            <nav className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+              <div className="mb-2 text-xs font-bold text-slate-500 uppercase tracking-wider px-4">Roadmap Progress</div>
+              {roadmapData.map((phase) => {
+                const PhaseIcon = phase.icon;
+                return (
+                  <SidebarItem 
+                    key={phase.id}
+                    id={phase.id}
+                    title={phase.title.split('：')[0]}
+                    icon={PhaseIcon}
+                    isActive={activeTab === phase.id}
+                    progress={progressData.phases[phase.id] || 0}
+                    onClick={() => setActiveTab(phase.id)}
+                  />
+                );
+              })}
+
+              <div className="mt-6 mb-2 text-xs font-bold text-slate-500 uppercase tracking-wider px-4">Core Principles</div>
+              <SidebarItem 
+                id="principles"
+                title="3つの鉄則"
+                icon={ShieldCheck}
+                isActive={activeTab === 'principles'}
+                progress={0} // No progress for principles
+                onClick={() => setActiveTab('principles')}
+              />
+            </nav>
+            
+            <div className="p-4 border-t border-slate-800">
+               <button 
+                onClick={handleReset}
+                className="w-full flex items-center justify-center gap-2 text-xs text-slate-500 hover:text-red-400 transition-colors py-2"
+               >
+                 <RefreshCw size={12} /> データをリセット
+               </button>
+            </div>
+          </aside>
+
+          {/* Main Content Area */}
+          <main className="flex-1 flex flex-col h-full overflow-hidden relative">
+            
+            {/* Mobile Header */}
+            <header className="lg:hidden bg-white border-b border-slate-200 p-4 flex items-center justify-between flex-shrink-0">
+              <div className="font-bold text-slate-800 flex items-center gap-2">
+                <Rocket className="text-blue-600" size={20} />
+                BizMap
+              </div>
+              <button 
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+              >
+                <Menu size={24} />
+              </button>
+            </header>
+
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-12 scroll-smooth">
+              <div className="max-w-4xl mx-auto">
+                
+                {activeTab === 'welcome' && (
+                  <Dashboard setActiveTab={setActiveTab} progressData={progressData} />
+                )}
+
+                {activeTab === 'principles' && <PrinciplesSection />}
+
+                {activePhaseData && (
+                  <div className="space-y-8 animate-fadeIn">
+                    {/* Phase Header */}
+                    <div className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 shadow-sm relative overflow-hidden">
+                      <div className="absolute top-0 right-0 p-8 opacity-5">
+                        <ActivePhaseIcon size={200} />
+                      </div>
+                      <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-4">
+                           <div className="text-blue-600 font-bold tracking-wider text-sm uppercase">Current Phase</div>
+                           <div className="flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+                             <span className="text-sm font-bold text-blue-700">
+                               Progress: {progressData.phases[activePhaseData.id] || 0}%
+                             </span>
+                           </div>
+                        </div>
+                        <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">{activePhaseData.title}</h2>
+                        <h3 className="text-xl text-slate-600 font-medium mb-4">{activePhaseData.subtitle}</h3>
+                        <p className="text-slate-600 leading-relaxed max-w-2xl">
+                          {activePhaseData.description}
+                        </p>
+                        <div className="mt-6 w-full max-w-md bg-slate-100 rounded-full h-2">
+                          <div 
+                            className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                            style={{ width: `${progressData.phases[activePhaseData.id] || 0}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Steps */}
+                    <div className="space-y-8">
+                      {activePhaseData.steps.map((step, index) => (
+                        <SectionCard 
+                          key={index} 
+                          phaseId={activePhaseData.id}
+                          step={step} 
+                          index={index} 
+                          userData={userData}
+                          onToggleAction={handleToggleAction}
+                          onNoteChange={handleNoteChange}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Navigation Footer */}
+                    <div className="flex justify-between items-center pt-8 border-t border-slate-200">
+                      <button 
+                         onClick={() => {
+                            const currentIndex = roadmapData.findIndex(d => d.id === activeTab);
+                            if (currentIndex > 0) setActiveTab(roadmapData[currentIndex - 1].id);
+                            else setActiveTab('welcome');
+                         }}
+                         className="text-slate-500 hover:text-blue-600 font-medium flex items-center gap-2 transition-colors"
+                      >
+                        Previous Phase
+                      </button>
+                      <button 
+                         onClick={() => {
+                            const currentIndex = roadmapData.findIndex(d => d.id === activeTab);
+                            if (currentIndex < roadmapData.length - 1) setActiveTab(roadmapData[currentIndex + 1].id);
+                            else setActiveTab('principles');
+                         }}
+                         className="bg-slate-900 hover:bg-slate-800 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                      >
+                        Next Phase
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+              </div>
+            </div>
+          </main>
+        </div>
+      );
+    }
+
+    // Render the app
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<BusinessRoadmapApp />);
+  </script>
+</body>
+</html>
